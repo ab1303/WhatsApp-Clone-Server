@@ -1,27 +1,46 @@
 import { ApolloServer, gql, PubSub } from 'apollo-server-express';
-import cors from 'cors';
-import express from 'express';
+import cookie from 'cookie';
 import http from 'http';
+import jwt from 'jsonwebtoken';
+import { app } from './app';
 import { users } from './db';
+import { origin, port, secret } from './env';
 import schema from './schema';
-
-const app = express();
-
-const origin = process.env.ORIGIN || 'http://localhost:3000';
-app.use(cors({ credentials: true, origin }));
-app.use(express.json());
-
-app.get('/_ping', (req, res) => {
-  res.send('pong');
-});
 
 const pubsub = new PubSub();
 const server = new ApolloServer({
   schema,
-  context: () => ({
-    currentUser: users.find((u) => u.id === '1'),
-    pubsub,
-  }),
+  context: (session: any) => {
+    // Access the request object
+    let req = session.connection
+      ? session.connection.context.request
+      : session.req;
+
+    // It's subscription
+    if (session.connection) {
+      req.cookies = cookie.parse(req.headers.cookie || '');
+    }
+
+    let currentUser;
+    if (req.cookies.authToken) {
+      const username = jwt.verify(req.cookies.authToken, secret) as string;
+      currentUser = username && users.find((u) => u.username === username);
+    }
+
+    return {
+      currentUser,
+      pubsub,
+      res: session.res,
+    };
+  },
+  subscriptions: {
+    onConnect(params, ws, ctx) {
+      // pass the request object to context
+      return {
+        request: ctx.request,
+      };
+    },
+  },
 });
 
 server.applyMiddleware({
@@ -32,8 +51,6 @@ server.applyMiddleware({
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
-
-const port = process.env.PORT || 4000;
 
 httpServer.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
