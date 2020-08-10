@@ -1,4 +1,4 @@
-import { ApolloServer, gql, PubSub } from 'apollo-server-express';
+import { ApolloServer } from 'apollo-server-express';
 import cookie from 'cookie';
 import http from 'http';
 import jwt from 'jsonwebtoken';
@@ -8,6 +8,7 @@ import { origin, port, secret } from './env';
 import schema from './schema';
 import { MyContext } from './context';
 import sql from 'sql-template-strings';
+import { UnsplashApi } from './schema/unsplash.api';
 const { PostgresPubSub } = require('graphql-postgres-subscriptions');
 
 const pubsub = new PostgresPubSub({
@@ -17,7 +18,6 @@ const pubsub = new PostgresPubSub({
   password: 'testpassword',
   database: 'whatsapp',
 });
-
 const server = new ApolloServer({
   schema,
   context: async (session: any) => {
@@ -68,6 +68,9 @@ const server = new ApolloServer({
 
     return res;
   },
+  dataSources: () => ({
+    unsplashApi: new UnsplashApi(),
+  }),
 });
 
 server.applyMiddleware({

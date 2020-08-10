@@ -26,3 +26,4 @@ yarn-error.log*
 test-results/
 test-results/junit.xml
 types/graphql.d.ts
+types/unsplash.d.ts
