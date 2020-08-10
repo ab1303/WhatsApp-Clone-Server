@@ -7,7 +7,7 @@
   "scripts": {
     "prestart": "yarn codegen",
     "start": "ts-node index.ts",
-    "test": "jest",
+    "test": "jest --runInBand --forceExit",
     "codegen": "graphql-codegen",
     "format": "prettier \"**/*.ts\" --write"
   },
@@ -27,6 +27,7 @@
     "@types/jest": "^26.0.8",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/node": "14.0.27",
+    "@types/pg": "^7.14.4",
     "apollo-server-testing": "^2.16.1",
     "jest": "^26.2.2",
     "jest-junit": "^11.1.0",
@@ -43,10 +44,13 @@
     "express": "^4.17.1",
     "graphql": "^15.3.0",
     "graphql-import": "^1.0.2",
+    "graphql-postgres-subscriptions": "^1.0.5",
     "graphql-scalars": "^1.2.6",
     "graphql-tools": "^6.0.16",
     "jsonwebtoken": "^8.5.1",
-    "prettier": "^2.0.5"
+    "pg": "^8.3.0",
+    "prettier": "^2.0.5",
+    "sql-template-strings": "^2.2.2"
   },
   "jest": {
     "transform": {
