@@ -1,7 +1,11 @@
+require('dotenv').config();
+
 import http from 'http';
 import { app } from './app';
 import { origin, port } from './env';
 import { server } from './server';
+
+require('events').EventEmitter.defaultMaxListeners = 50;
 
 server.applyMiddleware({
   app,

@@ -1,9 +1,8 @@
 import { GraphQLModule } from '@graphql-modules/core';
 import { gql, withFilter } from 'apollo-server-express';
-import sql from 'sql-template-strings';
 import commonModule from '../common';
 import usersModule from '../users';
-import { Message, Chat, pool } from '../../db';
+import { Message, Chat } from '../../db';
 import { Resolvers } from '../../types/graphql';
 import { UnsplashApi } from './unsplash.api';
 import { Users } from './../users/users.provider';
@@ -22,12 +21,18 @@ const typeDefs = gql`
     isMine: Boolean!
   }
 
+  type MessagesResult {
+    cursor: Float
+    hasMore: Boolean!
+    messages: [Message!]!
+  }
+
   type Chat {
     id: ID!
     name: String
     picture: URL
     lastMessage: Message
-    messages: [Message!]!
+    messages(limit: Int!, after: Float): MessagesResult!
     participants: [User!]!
   }
 
@@ -106,7 +111,11 @@ const resolvers: Resolvers = {
     },
 
     async messages(chat, args, { injector }) {
-      return injector.get(Chats).findMessagesByChat(chat.id);
+      return injector.get(Chats).findMessagesByChat({
+        chatId: chat.id,
+        limit: args.limit,
+        after: args.after,
+      });
     },
 
     async lastMessage(chat, args, { injector }) {

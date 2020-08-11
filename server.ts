@@ -26,4 +26,8 @@ export const server = new ApolloServer({
     return rootModule.context(session);
   },
   subscriptions: rootModule.subscriptions,
+  engine: {
+    reportSchema: true,
+    graphVariant: 'current',
+  },
 });
